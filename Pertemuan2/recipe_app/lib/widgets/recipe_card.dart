@@ -1,6 +1,10 @@
+// lib/widgets/recipe_card.dart
+
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/recipe.dart';
+import '../screens/detail_page.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
@@ -9,111 +13,140 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecipeDetailPage(recipe: recipe),
           ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.network(
-              recipe.imageUrl,
-              height: 220,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 220,
-                  color: Colors.grey[300],
-                  child: Center(
-                    child: Icon(Icons.broken_image, color: Colors.grey[600], size: 50),
-                  ),
-                );
-              },
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
-          ),
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Hero untuk animasi transisi gambar
+            Hero(
+              tag: recipe.imageUrl,
+              child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.8),
-                  ],
-                  stops: const [0.5, 1.0],
+                child: Image.asset( // Menggunakan Image.asset untuk gambar lokal
+                  recipe.imageUrl,
+                  height: 220, // KUNCI UTAMA: Mengatur tinggi tetap pada gambar
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 220,
+                      color: Colors.grey[300],
+                      child: Center(
+                        child: Icon(Icons.broken_image, color: Colors.grey[600], size: 50),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  recipe.title,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+            
+            // Gradient overlay
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.8),
+                    ],
+                    stops: const [0.5, 1.0],
                   ),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.access_time, size: 20, color: Colors.white70),
-                    const SizedBox(width: 6),
-                    Text(recipe.duration, style: const TextStyle(color: Colors.white70, fontSize: 15)),
-                    const SizedBox(width: 20),
-                    const Icon(Icons.local_fire_department, size: 20, color: Colors.white70),
-                    const SizedBox(width: 6),
-                    Text(recipe.difficulty, style: const TextStyle(color: Colors.white70, fontSize: 15)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 15,
-            right: 15,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(15),
               ),
-              child: Row(
+            ),
+            
+            // Teks info di bawah
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
-                  const SizedBox(width: 6),
                   Text(
-                    recipe.rating.toStringAsFixed(1),
+                    recipe.title,
                     style: GoogleFonts.montserrat(
-                      color: Colors.white,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      color: Colors.white,
+                      shadows: [Shadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 10)]
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.timer_outlined, size: 18, color: Colors.white70),
+                      const SizedBox(width: 4),
+                      Text(recipe.duration, style: const TextStyle(color: Colors.white70)),
+                      const SizedBox(width: 16),
+                      const Icon(Icons.whatshot_outlined, size: 18, color: Colors.white70),
+                      const SizedBox(width: 4),
+                      Text(recipe.difficulty, style: const TextStyle(color: Colors.white70)),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+
+            // Badge rating dengan efek kaca buram
+            Positioned(
+              top: 15,
+              right: 15,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          recipe.rating.toStringAsFixed(1),
+                          style: GoogleFonts.montserrat(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

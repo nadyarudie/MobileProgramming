@@ -1,0 +1,8 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    const_with_non_const: ignore
+    prefer_const_constructors: warning
+    unnecessary_const: ignore
+    prefer_const_literals_to_create_immutables: warning
