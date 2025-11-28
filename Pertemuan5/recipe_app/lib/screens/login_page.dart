@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../routes.dart';
 import '../providers/auth_view_model.dart';
 import '../providers/auth_state.dart';
+import '../services/auth_service.dart'; // Pastikan import ini ada
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -26,6 +27,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
+  /// Fungsi Login (Menggunakan Provider/ViewModel yang sudah ada)
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -33,6 +35,59 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           _usernameC.text.trim(),
           _passC.text,
         );
+  }
+
+  /// Fungsi Register (Langsung panggil AuthService untuk syarat POST)
+  Future<void> _handleRegister() async {
+    final username = _usernameC.text.trim();
+    final password = _passC.text;
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Isi Username dan Password untuk mendaftar!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Tampilkan loading indikator
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sedang mendaftarkan...')),
+    );
+
+    try {
+      // Memanggil fungsi register (POST) dari AuthService
+      final authService = AuthService();
+      final success = await authService.register(username, password);
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Registrasi Berhasil (POST Sukses)! Silakan Login.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Gagal Daftar. Username mungkin sudah dipakai.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -91,7 +146,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Masuk untuk melanjutkan ke aplikasi resep',
+                          'Masuk atau Daftar untuk melanjutkan',
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 16,
@@ -146,22 +201,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             suffixIcon: IconButton(
                               tooltip: _obscure ? 'Tampilkan' : 'Sembunyikan',
                               icon: Icon(
-                                _obscure ? Icons.visibility : Icons.visibility_off,
+                                _obscure
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
-                              onPressed: () => setState(() => _obscure = !_obscure),
+                              onPressed: () =>
+                                  setState(() => _obscure = !_obscure),
                             ),
                           ),
                           validator: (v) {
                             if (v == null || v.isEmpty) {
                               return 'Password wajib diisi';
                             }
-                            if (v.length < 6) {
-                              return 'Password minimal 6 karakter';
+                            if (v.length < 3) {
+                              return 'Password minimal 3 karakter';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 30),
+                        
+                        // Tombol LOGIN
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -200,6 +260,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  
+                  // Bagian DAFTAR / REGISTER
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -208,8 +270,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         style: TextStyle(color: Colors.grey[700]),
                       ),
                       TextButton(
-                        onPressed: () {},
-                        child: const Text('Daftar di sini'),
+                        onPressed: _handleRegister, // Panggil fungsi register
+                        child: const Text(
+                          'Daftar di sini (POST)',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),

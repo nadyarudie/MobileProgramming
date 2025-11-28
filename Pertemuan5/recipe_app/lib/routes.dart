@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'screens/home_page.dart';
-import 'screens/detail_page.dart';
+import 'screens/detail_page.dart'; 
 import 'screens/login_page.dart';
 import 'screens/profile_page.dart';
 import 'models/recipe.dart';
+import 'screens/register_page.dart';
 
-/// Defines static constants for app route names to avoid using raw strings.
+/// Defines static constants for app route names.
 class AppRoutes {
   static const String home = '/';
   static const String detail = '/detail';
   static const String login = '/login';
   static const String profile = '/profile';
+  static const String register = '/register';
 }
 
 /// A utility widget that redirects to the home route.
-/// Used as a fallback when a route is accessed without necessary arguments.
 class _RedirectToHome extends StatefulWidget {
   const _RedirectToHome();
 
@@ -35,7 +36,6 @@ class _RedirectToHomeState extends State<_RedirectToHome> {
 
   @override
   Widget build(BuildContext context) {
-    // Renders an empty box while the redirect is in progress.
     return const SizedBox.shrink();
   }
 }
@@ -55,10 +55,10 @@ class AppRouter {
         if (args is Recipe) {
           return MaterialPageRoute(
             settings: const RouteSettings(name: AppRoutes.detail),
-            builder: (_) => RecipeDetailPage(recipe: args),
+            // PERBAIKAN: Gunakan RecipeDetailPage sesuai nama class di detail_page.dart
+            builder: (_) => RecipeDetailPage(recipe: args), 
           );
         }
-        // If /detail is accessed without a Recipe, redirect to home.
         return MaterialPageRoute(
           settings: const RouteSettings(name: AppRoutes.home),
           builder: (_) => const _RedirectToHome(),
@@ -68,6 +68,12 @@ class AppRouter {
         return MaterialPageRoute(
           settings: const RouteSettings(name: AppRoutes.login),
           builder: (_) => const LoginPage(),
+        );
+
+      case AppRoutes.register:
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: AppRoutes.register),
+          builder: (_) => const RegisterPage(),
         );
 
       case AppRoutes.profile:
